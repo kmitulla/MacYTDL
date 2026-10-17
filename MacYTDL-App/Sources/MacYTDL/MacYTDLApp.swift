@@ -109,6 +109,8 @@ final class AppState: ObservableObject {
     @Published var showOnboarding = false
     @Published var logTask: DownloadTask?
     @Published var focusURLField = UUID()
+    /// Captured from a SwiftUI view so the app delegate can reopen the main window (Dock click).
+    var openMainWindow: (() -> Void)?
 
     private var lastChangeCount = NSPasteboard.general.changeCount
     private var dismissedClipboard: Set<String> = []
@@ -244,6 +246,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 }
             }
         }
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            MainActor.assumeIsolated { AppState.shared.openMainWindow?() }
+        }
+        return true
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

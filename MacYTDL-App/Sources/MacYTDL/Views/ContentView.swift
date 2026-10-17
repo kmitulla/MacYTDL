@@ -6,6 +6,7 @@ struct ContentView: View {
     @EnvironmentObject private var downloads: DownloadManager
     @EnvironmentObject private var tools: ToolManager
     @EnvironmentObject private var prefs: Preferences
+    @Environment(\.openWindow) private var openWindow
     @State private var isDropTargeted = false
 
     private let clipboardTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
@@ -25,6 +26,10 @@ struct ContentView: View {
             .toolbar { MainToolbar() }
         }
         .frame(minWidth: 940, minHeight: 620)
+        .onAppear {
+            let open = openWindow
+            appState.openMainWindow = { open(id: "main") }
+        }
         .onDrop(of: [.url, .fileURL, .plainText, .text], isTargeted: $isDropTargeted, perform: handleDrop)
         .onReceive(clipboardTimer) { _ in
             if NSApp.isActive { appState.checkClipboard() }
@@ -140,6 +145,7 @@ private struct Sidebar: View {
 private struct SidebarFooter: View {
     @EnvironmentObject private var downloads: DownloadManager
     @EnvironmentObject private var tools: ToolManager
+    @ObservedObject private var disk = DiskSpaceMonitor.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -177,7 +183,7 @@ private struct SidebarFooter: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 Spacer()
-                if let free = Finder.freeDiskSpace {
+                if let free = disk.free {
                     Text("\(Format.bytes(free)) free")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)

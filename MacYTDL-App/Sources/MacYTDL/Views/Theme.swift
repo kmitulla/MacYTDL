@@ -350,11 +350,39 @@ enum Finder {
         return panel.runModal() == .OK ? panel.url?.path : nil
     }
 
-    /// Free space on the home volume. (Deliberately doesn't touch ~/Downloads, which would trigger a
-    /// privacy prompt at launch.)
-    static var freeDiskSpace: Int64? {
-        let values = try? URL(fileURLWithPath: NSHomeDirectory())
-            .resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
-        return values?.volumeAvailableCapacityForImportantUsage
+    static var freeDiskSpace: Int64? { DiskSpaceMonitor.shared.free }
+}
+
+/// Free space on the home volume, measured in the background (the "important usage" query can take
+/// seconds because it asks the system how much purgeable space it could free). Deliberately doesn't
+/// touch ~/Downloads, which would trigger a privacy prompt at launch.
+@MainActor
+final class DiskSpaceMonitor: ObservableObject {
+    static let shared = DiskSpaceMonitor()
+    @Published private(set) var free: Int64?
+    private var timer: Timer?
+    private var running = false
+
+    init() {
+        refresh()
+        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.refresh() }
+        }
+    }
+
+    func refresh() {
+        guard !running else { return }
+        running = true
+        Task.detached(priority: .utility) {
+            let home = URL(fileURLWithPath: NSHomeDirectory())
+            let quick = (try? home.resourceValues(forKeys: [.volumeAvailableCapacityKey]))?.volumeAvailableCapacity.map(Int64.init)
+            await MainActor.run { if DiskSpaceMonitor.shared.free == nil { DiskSpaceMonitor.shared.free = quick } }
+            let important = (try? home.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?
+                .volumeAvailableCapacityForImportantUsage
+            await MainActor.run {
+                DiskSpaceMonitor.shared.free = important ?? quick
+                DiskSpaceMonitor.shared.running = false
+            }
+        }
     }
 }

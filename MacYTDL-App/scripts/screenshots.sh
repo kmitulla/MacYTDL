@@ -20,7 +20,9 @@ for page in home preview queue library search subscriptions settings onboarding;
   if [ -f "$OUT/$page.png.wid" ] && [ "$(cat "$OUT/$page.png.wid")" != 0 ]; then
     screencapture -x -o -l "$(cat "$OUT/$page.png.wid")" "$OUT/$page-window.png" 2>/dev/null || true
   else
-    echo "no snapshot for $page"
+    echo "no snapshot for $page – sampling main thread"
+    /usr/bin/sample $pid 3 -file "$OUT/$page-sample.log" >/dev/null 2>&1 || true
+    grep -A40 "Thread_.*DispatchQueue_1: com.apple.main-thread" "$OUT/$page-sample.log" | head -60 || true
   fi
   for _ in $(seq 1 30); do
     kill -0 $pid 2>/dev/null || break
