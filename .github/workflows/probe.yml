@@ -1,0 +1,36 @@
+name: probe
+on:
+  push:
+    branches: [ "claude/**" ]
+    paths: [ ".github/workflows/probe.yml" ]
+  workflow_dispatch:
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-26, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Environment
+        run: |
+          sw_vers; uname -m
+          ls -d /Applications/Xcode*.app || true
+          xcode-select -p
+          swift --version
+          xcrun --show-sdk-version
+      - name: Network
+        run: |
+          for u in \
+            https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos \
+            https://github.com/denoland/deno/releases/latest/download/deno-aarch64-apple-darwin.zip \
+            https://github.com/denoland/deno/releases/latest/download/deno-x86_64-apple-darwin.zip \
+            https://ffmpeg.martin-riedl.de/redirect/latest/macos/arm64/release/ffmpeg.zip \
+            https://ffmpeg.martin-riedl.de/redirect/latest/macos/arm64/release/ffprobe.zip \
+            https://ffmpeg.martin-riedl.de/redirect/latest/macos/amd64/release/ffmpeg.zip \
+            https://ffmpeg.martin-riedl.de/redirect/latest/macos/amd64/release/ffprobe.zip ; do
+            echo "== $u"; curl -sSIL -o /dev/null -w "%{http_code} %{url_effective} %{size_download}\n" "$u" || true
+          done
+      - name: Screencapture
+        run: |
+          screencapture -x shot.png && ls -la shot.png || echo "screencapture failed"
