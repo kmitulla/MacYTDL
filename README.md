@@ -1,3 +1,25 @@
+# MacYTDL 2030 (native SwiftUI edition)
+
+**[⬇︎ MacYTDL.dmg herunterladen](https://github.com/kmitulla/MacYTDL/releases/latest/download/MacYTDL.dmg)** · macOS 14 Sonoma or later · Apple Silicon & Intel
+
+A complete rewrite of MacYTDL as a native SwiftUI app with a Liquid Glass design for macOS 26/27 and a Windows 11-style Mica/Fluent feel. The source is in [`MacYTDL-App/`](MacYTDL-App).
+
+* **Preview before download**: title, thumbnail, channel, available qualities (4K/HDR) and estimated file size.
+* **Smart commands**: “nur Audio als MP3 von 1:20 bis 3:00 ohne Sponsoren”. Uses Apple Intelligence on-device when available, otherwise a built-in parser for German and English.
+* **Queue**: parallel downloads, pause/resume (continues partial files), automatic retries, Dock progress, keeps the Mac awake, optional sleep/quit when done.
+* **Library** with search, Quick Look and sharing; **YouTube search** inside the app; **subscriptions** that download new videos from channels and playlists automatically.
+* Clips (time ranges), SponsorBlock, subtitles, embedded cover art, metadata and chapters, Apple-compatible H.264/AAC MP4, playlists with item selection.
+* Menu bar extra, ⇧⌘V instant download, drag & drop, browser bookmarklets, Services menu and a `macytdl://` URL scheme.
+* Clear error help, e.g. “use browser cookies” when YouTube asks you to confirm you're not a bot.
+* Includes yt-dlp, FFmpeg and Deno, so no Homebrew and no admin password are needed. yt-dlp updates itself daily.
+* German and English UI.
+
+**Installing:** open the DMG and drag MacYTDL to Applications. The app is ad-hoc signed, not notarized, so the first time you open it go to System Settings › Privacy & Security and click “Open Anyway”, or run `xattr -dr com.apple.quarantine /Applications/MacYTDL.app`.
+
+**Building:** `cd MacYTDL-App && ./scripts/fetch_tools.sh vendor && ./scripts/build_app.sh vendor && ./scripts/make_dmg.sh` (Xcode 26). CI (`.github/workflows/macytdl-app.yml`) builds a universal app, runs real downloads through the app engine (`MacYTDL --selftest`), captures screenshots and publishes the DMG.
+
+---
+
 # MacYTDL
 
 MacYTDL is a utility which downloads videos using the [_youtube-dl_](https://github.com/ytdl-org/youtube-dl) and [_YT-DLP_](https://github.com/yt-dlp/yt-dlp) video downloader scripts. _youtube-dl_ and _YT-DLP_ are able to download videos from a great many web sites. MacYTDL runs on any Apple Mac with macOS 10.10 or later. macOS 10.15 or higher is required to use _YT-DLP_. MacYTDL has been developed mostly in AppleScript. The code is not accessable from within the applet. However, text exports of the code are in the "Code" folder above and can be opened in _Script Editor_. MacYTDL is code signed and notarized.

@@ -158,7 +158,7 @@ enum CommandBuilder {
         switch o.preset {
         case .appleCompatible:
             args += ["--format", "bv*[vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]/bv*+ba/b",
-                     "--format-sort", "vcodec:h264,res,acodec:m4a"]
+                     "--format-sort", "vcodec:h264,res,acodec:aac"]
             args += ["--merge-output-format", "mp4", "--remux-video", "mp4"]
             return args
         default:
@@ -170,7 +170,7 @@ enum CommandBuilder {
         }
         if o.container == .mp4 || o.container == .mov {
             // Prefer codecs that QuickTime can play when quality is equal.
-            args += ["--format-sort", "res,fps,vcodec:h265,acodec:m4a"]
+            args += ["--format-sort", "res,fps,vcodec:h265,acodec:aac"]
         }
         args += ["--merge-output-format", container]
         if o.container == .mov { args += ["--remux-video", "mov"] }
