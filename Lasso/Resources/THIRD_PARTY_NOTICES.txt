@@ -1,0 +1,9 @@
+Lasso bundles the following third-party programs, unmodified:
+
+yt-dlp   – https://github.com/yt-dlp/yt-dlp – The Unlicense (public domain)
+Deno     – https://github.com/denoland/deno – MIT License
+FFmpeg   – https://ffmpeg.org – GPL v2+/LGPL; static macOS builds from https://ffmpeg.martin-riedl.de
+           (source code: https://ffmpeg.org/download.html)
+
+Lasso is based on MacYTDL by section83 (https://github.com/section83/MacYTDL).
+The MacYTDL license applies: free for personal, non-commercial use.

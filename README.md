@@ -1,31 +1,31 @@
-# MacYTDL 2030 (native SwiftUI edition)
+# Lasso 1.0 – the successor of MacYTDL 2030
 
-**[⬇︎ MacYTDL.dmg herunterladen](https://github.com/kmitulla/MacYTDL/releases/latest/download/MacYTDL.dmg)** · macOS 14 Sonoma or later · Apple Silicon & Intel
+**[⬇︎ Lasso.dmg herunterladen](https://github.com/kmitulla/MacYTDL/releases/latest/download/Lasso.dmg)** · macOS 14 Sonoma or later · Apple Silicon & Intel
 
 <p>
-<img src="Images/MacYTDL-2030/preview.png" width="49%" alt="Preview with smart command">
-<img src="Images/MacYTDL-2030/preview-dark.png" width="49%" alt="Dark mode">
-<img src="Images/MacYTDL-2030/queue.png" width="49%" alt="Download queue">
-<img src="Images/MacYTDL-2030/search.png" width="49%" alt="YouTube search">
-<img src="Images/MacYTDL-2030/subscriptions.png" width="49%" alt="Subscriptions">
-<img src="Images/MacYTDL-2030/library.png" width="49%" alt="Library">
+<img src="Images/Lasso/music.png" width="49%" alt="Spotify album ready to download">
+<img src="Images/Lasso/player-dark.png" width="49%" alt="Library with mini player (dark)">
+<img src="Images/Lasso/preview.png" width="49%" alt="Preview with smart command">
+<img src="Images/Lasso/queue.png" width="49%" alt="Download queue">
+<img src="Images/Lasso/albums.png" width="49%" alt="Library grouped by album">
+<img src="Images/Lasso/playerwindow.png" width="49%" alt="Player window">
 </p>
 
-A complete rewrite of MacYTDL as a native SwiftUI app with a Liquid Glass design for macOS 26/27 and a Windows 11-style Mica/Fluent feel. The source is in [`MacYTDL-App/`](MacYTDL-App).
+Lasso is a native SwiftUI app with a Liquid Glass design for macOS 26/27, built on MacYTDL. The source is in [`Lasso/`](Lasso).
+Settings, library and subscriptions from MacYTDL 2030 are taken over automatically.
 
-* **Preview before download**: title, thumbnail, channel, available qualities (4K/HDR) and estimated file size.
-* **Smart commands**: “nur Audio als MP3 von 1:20 bis 3:00 ohne Sponsoren”. Uses Apple Intelligence on-device when available, otherwise a built-in parser for German and English.
-* **Queue**: parallel downloads, pause/resume (continues partial files), automatic retries, Dock progress, keeps the Mac awake, optional sleep/quit when done.
-* **Library** with search, Quick Look and sharing; **YouTube search** inside the app; **subscriptions** that download new videos from channels and playlists automatically.
-* Clips (time ranges), SponsorBlock, subtitles, embedded cover art, metadata and chapters, Apple-compatible H.264/AAC MP4, playlists with item selection.
-* Menu bar extra, ⇧⌘V instant download, drag & drop, browser bookmarklets, Services menu and a `macytdl://` URL scheme.
-* Clear error help, e.g. “use browser cookies” when YouTube asks you to confirm you're not a bot.
-* Includes yt-dlp, FFmpeg and Deno, so no Homebrew and no admin password are needed. yt-dlp updates itself daily.
-* German and English UI.
+* **Music & Spotify**: paste Spotify songs, albums, playlists or an artist. Spotify itself is DRM-protected, so Lasso reads the song list, finds every song on YouTube Music (checking the length) and writes Spotify's title, artists, album, track number, year and a square cover into the MP3/M4A/FLAC/Opus file. An optional free Spotify API key loads playlists longer than 100 songs.
+* **Playlists** from YouTube, YouTube Music, SoundCloud and more: preview, pick songs, reorder by drag & drop or sort by album/artist/length/shuffle, own folder, numbered files, `.m3u8` playlist file, and “skip already downloaded” to sync a playlist later.
+* **Built-in player**: mini player, player window with Up Next, Picture in Picture, full screen, shuffle/repeat, speed, media keys/Control Center, resumes long videos where you stopped. Formats macOS can't play are converted with one click.
+* **Organize the library**: favorites, collections with their own order, group by album/artist/website/month, sort by album & track, plays, length …, edit tags (also inside the files), sort files into folders (Artist/Album/Title …), find duplicates, import folders, export `.m3u8`, convert to MP4/M4A/MP3.
+* **Menu bar mode**: the yellow window button (or ⌥⌘M) hides Lasso in the menu bar; the ring icon shows live progress and has a mini player.
+* **Customize the look**: Liquid Glass, frosted or solid surfaces, accent colors, background glow, compact layout, thumbnails on/off, hide sidebar pages.
+* Everything from MacYTDL 2030: preview with qualities and sizes, smart commands (“nur Audio als MP3 von 1:20 bis 3:00 ohne Sponsoren”), parallel queue with pause/resume and retries, YouTube search, subscriptions, clips, SponsorBlock, subtitles, ⇧⌘V instant download, Services menu, bookmarklets and a `lasso://` URL scheme.
+* Includes yt-dlp, FFmpeg and Deno, so no Homebrew and no admin password are needed. yt-dlp updates itself daily. German and English UI.
 
-**Installing:** open the DMG and drag MacYTDL to Applications. The app is ad-hoc signed, not notarized, so the first time you open it go to System Settings › Privacy & Security and click “Open Anyway”, or run `xattr -dr com.apple.quarantine /Applications/MacYTDL.app`.
+**Installing:** open the DMG and drag Lasso to Applications. The app is ad-hoc signed, not notarized, so the first time you open it go to System Settings › Privacy & Security and click “Open Anyway”, or run `xattr -dr com.apple.quarantine /Applications/Lasso.app`.
 
-**Building:** `cd MacYTDL-App && ./scripts/fetch_tools.sh vendor && ./scripts/build_app.sh vendor && ./scripts/make_dmg.sh` (Xcode 26). CI (`.github/workflows/macytdl-app.yml`) builds a universal app, runs real downloads through the app engine (`MacYTDL --selftest`), captures screenshots and publishes the DMG.
+**Building:** `cd Lasso && ./scripts/fetch_tools.sh vendor && ./scripts/build_app.sh vendor && ./scripts/make_dmg.sh` (Xcode 26). CI (`.github/workflows/lasso-app.yml`) builds a universal app, runs real downloads, tagging, playlist and Spotify parsing tests through the app engine (`Lasso --selftest`), captures screenshots and publishes the DMG.
 
 ---
 

@@ -1,0 +1,138 @@
+name: Lasso app (build, test, release DMG)
+
+on:
+  push:
+    branches: [ "master", "claude/**" ]
+    paths: [ "Lasso/**", ".github/workflows/lasso-app.yml" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lasso-app-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERSION: "1.0.0"
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 75
+    defaults:
+      run:
+        working-directory: Lasso
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app || true
+          swift --version
+          sw_vers
+
+      - name: Compile (fail fast)
+        run: swift build -c release 2>&1 | tail -n 300
+
+      - name: Check compile result
+        run: swift build -c release
+
+      - name: Tool cache key
+        id: day
+        run: echo "day=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache bundled tools
+        uses: actions/cache@v4
+        with:
+          path: Lasso/vendor
+          key: tools-${{ hashFiles('Lasso/scripts/fetch_tools.sh') }}-${{ steps.day.outputs.day }}
+
+      - name: Fetch yt-dlp, FFmpeg, Deno
+        run: |
+          if [ ! -f vendor/Tools/manifest.json ]; then ./scripts/fetch_tools.sh vendor; fi
+          cat vendor/Tools/manifest.json
+
+      - name: Build Lasso.app (universal)
+        run: BUILD=${{ github.run_number }} ./scripts/build_app.sh vendor
+
+      - name: Screenshots (demo mode)
+        if: always()
+        continue-on-error: true
+        run: ./scripts/screenshots.sh dist/Lasso.app "$RUNNER_TEMP/shots" de
+
+      - name: Self-test (real downloads through the app engine)
+        id: selftest
+        run: |
+          set -o pipefail
+          dist/Lasso.app/Contents/MacOS/Lasso --selftest "$RUNNER_TEMP/selftest" 2>&1 | tee "$RUNNER_TEMP/selftest.log"
+
+      - name: Create DMG
+        run: ./scripts/make_dmg.sh
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lasso-${{ env.VERSION }}-${{ github.run_number }}
+          path: |
+            Lasso/dist/Lasso.dmg
+            ${{ runner.temp }}/shots
+            ${{ runner.temp }}/selftest.log
+          if-no-files-found: ignore
+
+      - name: Publish CI preview (screenshots + logs)
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=ci-preview
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --prerelease --target "$GITHUB_SHA" \
+            --title "CI preview (screenshots)" --notes "Automatic screenshots and self-test logs from CI. Not a release."
+          FILES=$(find "$RUNNER_TEMP/shots" "$RUNNER_TEMP/selftest.log" -type f -size +0 \( -name '*.png' -o -name '*.log' \) 2>/dev/null || true)
+          [ -n "$FILES" ] && gh release upload "$TAG" $FILES --clobber
+
+      - name: Publish release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$VERSION"
+          MANIFEST=$(cat vendor/Tools/manifest.json)
+          cat > notes.md <<NOTES
+          ## Lasso $VERSION (Build ${{ github.run_number }})
+
+          **Download:** [Lasso.dmg](https://github.com/${{ github.repository }}/releases/download/$TAG/Lasso.dmg)
+
+          Lasso ist der Nachfolger von MacYTDL 2030: eine native SwiftUI-App im Liquid-Glass-Design (macOS 26/27).
+          Läuft auf macOS 14 Sonoma und neuer, Apple Silicon und Intel.
+
+          ### Neu in Lasso 1.0
+          - **Musik & Spotify:** Songs, Alben, Playlists und Künstler von Spotify einfügen – Lasso findet jeden Song auf YouTube Music,
+            lädt ihn als MP3/M4A/FLAC/Opus und schreibt Titel, Interpret, Album, Tracknummer, Jahr und Cover hinein
+          - **Playlists:** jede Playlist mit Vorschau, Auswahl, Reihenfolge per Drag & Drop oder Sortierung (Album, Interpret, Länge, Zufall),
+            eigener Ordner, Nummerierung, .m3u8-Datei, bereits geladene Titel überspringen
+          - **Player direkt in der App:** Mini-Player, eigenes Player-Fenster mit „Als Nächstes“, Bild-in-Bild, Vollbild,
+            Zufall/Wiederholen, Geschwindigkeit, Medientasten, Fortsetzen an der letzten Stelle
+          - **Bibliothek organisieren:** Favoriten, Sammlungen mit eigener Reihenfolge, Gruppieren nach Album/Interpret/Website/Monat,
+            Sortieren, Tags bearbeiten, Dateien in Ordner einsortieren, Duplikate finden, Ordner importieren, M3U-Export, Konvertieren
+          - **Menüleiste:** Der gelbe Fenster-Knopf (⌥⌘M) minimiert Lasso in die Menüleiste – mit Live-Fortschrittsring und Mini-Player
+          - **Darstellung:** Liquid Glass, Milchglas oder schlicht; Hintergrund-Intensität, kompakte Ansicht, Seiten ein-/ausblenden
+          - Neues Logo und neuer Name, Einstellungen und Bibliothek aus MacYTDL werden übernommen
+
+          ### Installation
+          1. DMG öffnen, Lasso in „Programme“ ziehen.
+          2. Beim ersten Start: Systemeinstellungen › Datenschutz & Sicherheit › „Trotzdem öffnen“
+             (oder \`xattr -dr com.apple.quarantine /Applications/Lasso.app\`). Die App ist ad-hoc signiert, nicht notarisiert.
+
+          ### Enthaltene Komponenten
+          \`\`\`
+          $MANIFEST
+          \`\`\`
+          SHA-256: \`$(cut -d' ' -f1 dist/Lasso.dmg.sha256)\`
+          NOTES
+          gh release delete "$TAG" --cleanup-tag -y >/dev/null 2>&1 || true
+          gh release create "$TAG" dist/Lasso.dmg --target "$GITHUB_SHA" --title "Lasso $VERSION" \
+            --notes-file notes.md --latest
+          echo "DMG: https://github.com/${{ github.repository }}/releases/download/$TAG/Lasso.dmg"
