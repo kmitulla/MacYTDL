@@ -53,6 +53,7 @@
 "Album" = "Album";
 "Album & track" = "Album & Track";
 "Album / Title" = "Album / Titel";
+"Albums and playlists from Spotify and YouTube Music, fully tagged." = "Alben und Playlists von Spotify und YouTube Music, sauber getaggt.";
 "All" = "Alle";
 "All components ship inside Lasso and are installed into ~/Library/Application Support/Lasso. Nothing is installed system-wide and no administrator password is needed." = "Alle Komponenten sind in Lasso enthalten und werden nach ~/Library/Application Support/Lasso installiert. Nichts wird systemweit installiert, kein Administratorpasswort nötig.";
 "All done. %lld finished." = "Alles erledigt. %lld fertig.";
@@ -621,7 +622,6 @@
 "Welcome to Lasso" = "Willkommen bei Lasso";
 "What are you looking for?" = "Wonach suchst du?";
 "When the queue is finished" = "Wenn die Warteschlange fertig ist";
-"Whole albums and playlists from Spotify and YouTube Music – tagged and numbered." = "Ganze Alben und Playlists von Spotify und YouTube Music – getaggt und nummeriert.";
 "Whole albums and playlists from Spotify, YouTube Music, YouTube or SoundCloud – named, numbered and tagged." = "Ganze Alben und Playlists von Spotify, YouTube Music, YouTube oder SoundCloud – benannt, nummeriert und getaggt.";
 "Whole albums and playlists – tagged, numbered, with a playlist file." = "Ganze Alben und Playlists – getaggt, nummeriert, mit Playlist-Datei.";
 "Whole playlist" = "Ganze Playlist";

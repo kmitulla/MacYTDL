@@ -122,7 +122,7 @@ struct OnboardingView: View {
             }
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 12) {
                 feature("bolt.fill", "Everything included", "yt-dlp, FFmpeg and Deno are built in and update themselves.")
-                feature("music.note.list", "Music & Spotify", "Whole albums and playlists from Spotify and YouTube Music – tagged and numbered.")
+                feature("music.note.list", "Music & Spotify", "Albums and playlists from Spotify and YouTube Music, fully tagged.")
                 feature("play.circle", "Player & library", "Play, sort by album and organize everything right in Lasso.")
                 feature("lock.shield", "Private", "No account, no tracking. Everything happens on your Mac.")
             }
