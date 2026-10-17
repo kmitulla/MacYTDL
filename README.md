@@ -2,6 +2,15 @@
 
 **[⬇︎ MacYTDL.dmg herunterladen](https://github.com/kmitulla/MacYTDL/releases/latest/download/MacYTDL.dmg)** · macOS 14 Sonoma or later · Apple Silicon & Intel
 
+<p>
+<img src="Images/MacYTDL-2030/preview.png" width="49%" alt="Preview with smart command">
+<img src="Images/MacYTDL-2030/preview-dark.png" width="49%" alt="Dark mode">
+<img src="Images/MacYTDL-2030/queue.png" width="49%" alt="Download queue">
+<img src="Images/MacYTDL-2030/search.png" width="49%" alt="YouTube search">
+<img src="Images/MacYTDL-2030/subscriptions.png" width="49%" alt="Subscriptions">
+<img src="Images/MacYTDL-2030/library.png" width="49%" alt="Library">
+</p>
+
 A complete rewrite of MacYTDL as a native SwiftUI app with a Liquid Glass design for macOS 26/27 and a Windows 11-style Mica/Fluent feel. The source is in [`MacYTDL-App/`](MacYTDL-App).
 
 * **Preview before download**: title, thumbnail, channel, available qualities (4K/HDR) and estimated file size.
