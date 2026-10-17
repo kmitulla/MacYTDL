@@ -7,6 +7,7 @@ struct ContentView: View {
     @EnvironmentObject private var tools: ToolManager
     @EnvironmentObject private var prefs: Preferences
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
     @State private var isDropTargeted = false
 
     private let clipboardTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
@@ -29,7 +30,9 @@ struct ContentView: View {
         .frame(minWidth: 940, minHeight: 620)
         .onAppear {
             let open = openWindow
+            let settings = openSettings
             appState.openMainWindow = { open(id: "main") }
+            appState.openSettingsWindow = { settings() }
         }
         .onDrop(of: [.url, .fileURL, .plainText, .text], isTargeted: $isDropTargeted, perform: handleDrop)
         .onReceive(clipboardTimer) { _ in

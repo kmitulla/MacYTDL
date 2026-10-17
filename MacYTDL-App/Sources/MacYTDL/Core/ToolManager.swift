@@ -120,22 +120,22 @@ final class ToolManager: ObservableObject {
 
     // MARK: Bundled tools
 
-    private var bundledDirectory: URL? {
+    nonisolated private static var bundledDirectory: URL? {
         guard let resources = Bundle.main.resourceURL else { return nil }
         let dir = resources.appendingPathComponent("Tools", isDirectory: true)
         return FileManager.default.fileExists(atPath: dir.path) ? dir : nil
     }
 
-    private var bundledManifest: [String: String] {
+    nonisolated private static var bundledManifest: [String: String] {
         guard let dir = bundledDirectory,
               let data = try? Data(contentsOf: dir.appendingPathComponent("manifest.json")),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: String] else { return [:] }
         return json
     }
 
-    private var installedManifestURL: URL { AppPaths.bin.appendingPathComponent("manifest.json") }
+    nonisolated private static var installedManifestURL: URL { AppPaths.bin.appendingPathComponent("manifest.json") }
 
-    private var installedManifest: [String: String] {
+    nonisolated private static var installedManifest: [String: String] {
         get {
             guard let data = try? Data(contentsOf: installedManifestURL),
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: String] else { return [:] }
@@ -148,11 +148,18 @@ final class ToolManager: ObservableObject {
         }
     }
 
-    /// Copies the tools shipped inside the app into Application Support (writable, so yt-dlp can update itself).
-    func installBundledToolsIfNeeded() {
-        guard let dir = bundledDirectory else { return }
+    /// Copies the tools shipped inside the app into Application Support (writable, so yt-dlp can update
+    /// itself). Runs off the main thread - the first copy moves a few hundred MB.
+    func installBundledToolsIfNeeded() async {
+        let errors = await Task.detached(priority: .userInitiated) { Self.copyBundledTools() }.value
+        if let first = errors.first { lastMessage = first }
+    }
+
+    nonisolated private static func copyBundledTools() -> [String] {
+        guard let dir = bundledDirectory else { return [] }
         let bundled = bundledManifest
         var installed = installedManifest
+        var errors: [String] = []
         let fm = FileManager.default
         for tool in HelperTool.allCases {
             let source = dir.appendingPathComponent(tool.rawValue)
@@ -179,19 +186,20 @@ final class ToolManager: ObservableObject {
                 let temp = AppPaths.bin.appendingPathComponent(".\(tool.rawValue).tmp")
                 try? fm.removeItem(at: temp)
                 try fm.copyItem(at: source, to: temp)
-                Self.makeRunnable(temp)
+                makeRunnable(temp)
                 if fm.fileExists(atPath: destination.path) {
                     _ = try fm.replaceItemAt(destination, withItemAt: temp)
                 } else {
                     try fm.moveItem(at: temp, to: destination)
                 }
-                Self.makeRunnable(destination)
+                makeRunnable(destination)
                 installed[tool.rawValue] = bundledVersion
             } catch {
-                lastMessage = String(localized: "Could not install \(tool.displayName): \(error.localizedDescription)")
+                errors.append(String(localized: "Could not install \(tool.displayName): \(error.localizedDescription)"))
             }
         }
         installedManifest = installed
+        return errors
     }
 
     nonisolated static func makeRunnable(_ url: URL) {
@@ -204,7 +212,7 @@ final class ToolManager: ObservableObject {
 
     func prepare() async {
         isPreparing = true
-        installBundledToolsIfNeeded()
+        await installBundledToolsIfNeeded()
         Self.ensureCertificateBundle()
         await refreshVersions()
         isPreparing = false
@@ -303,9 +311,9 @@ final class ToolManager: ObservableObject {
         await refreshVersions()
         let after = status[.ytdlp]?.version
         if let after {
-            var installed = installedManifest
+            var installed = Self.installedManifest
             installed[HelperTool.ytdlp.rawValue] = after
-            installedManifest = installed
+            Self.installedManifest = installed
         }
         let combined = result.stdout + "\n" + result.stderr
         if result.status == 0 {
@@ -344,9 +352,9 @@ final class ToolManager: ObservableObject {
             for attempt in 1...3 {
                 do {
                     try await downloadZip(url, extracting: tool.rawValue)
-                    var installed = installedManifest
+                    var installed = Self.installedManifest
                     installed[tool.rawValue] = "downloaded-\(Int(Date().timeIntervalSince1970))"
-                    installedManifest = installed
+                    Self.installedManifest = installed
                     await refreshVersions()
                     lastMessage = String(localized: "\(tool.displayName) was reinstalled.")
                     return true

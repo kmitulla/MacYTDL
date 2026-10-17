@@ -38,7 +38,7 @@ enum SelfTest {
 
         print("== Components")
         let tools = ToolManager.shared
-        tools.installBundledToolsIfNeeded()
+        await tools.installBundledToolsIfNeeded()
         await tools.refreshVersions()
         for tool in HelperTool.allCases {
             let status = tools.status[tool]

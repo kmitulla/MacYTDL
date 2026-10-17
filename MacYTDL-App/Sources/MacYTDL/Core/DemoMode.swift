@@ -79,7 +79,11 @@ enum DemoMode {
         if page == "settings" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 MainActor.assumeIsolated {
-                    _ = NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    if let open = AppState.shared.openSettingsWindow {
+                        open()
+                    } else {
+                        _ = NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    }
                 }
             }
         }

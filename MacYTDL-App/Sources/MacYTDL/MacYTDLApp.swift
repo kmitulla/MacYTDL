@@ -127,6 +127,7 @@ final class AppState: ObservableObject {
     }
     /// Captured from a SwiftUI view so the app delegate can reopen the main window (Dock click).
     var openMainWindow: (() -> Void)?
+    var openSettingsWindow: (() -> Void)?
 
     private var lastChangeCount = NSPasteboard.general.changeCount
     private var dismissedClipboard: Set<String> = []
