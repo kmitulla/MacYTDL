@@ -313,6 +313,7 @@
 "Move files to Trash" = "Dateien in den Papierkorb";
 "Music" = "Musik";
 "Music & Playlists" = "Musik & Playlists";
+"Music & Spotify" = "Musik & Spotify";
 "Music downloads" = "Musik-Downloads";
 "Name" = "Name";
 "Name, e.g. “Road trip”" = "Name, z. B. „Roadtrip“";
@@ -398,11 +399,13 @@
 "Play from here" = "Ab hier abspielen";
 "Play in Lasso" = "In Lasso abspielen";
 "Play in Lasso (double-click in the library)" = "In Lasso abspielen (Doppelklick in der Bibliothek)";
+"Play, sort by album and organize everything right in Lasso." = "Abspielen, nach Album sortieren und alles direkt in Lasso organisieren.";
 "Play/Pause" = "Wiedergabe/Pause";
 "Play/Pause (⌥Space)" = "Wiedergabe/Pause (⌥Leertaste)";
 "Playback" = "Wiedergabe";
 "Playback speed" = "Wiedergabegeschwindigkeit";
 "Player" = "Player";
+"Player & library" = "Player & Bibliothek";
 "Playlist" = "Playlist";
 "Playlist file (.m3u8)" = "Playlist-Datei (.m3u8)";
 "Please paste a valid link (https://…)." = "Bitte füge einen gültigen Link ein (https://…).";
@@ -618,6 +621,7 @@
 "Welcome to Lasso" = "Willkommen bei Lasso";
 "What are you looking for?" = "Wonach suchst du?";
 "When the queue is finished" = "Wenn die Warteschlange fertig ist";
+"Whole albums and playlists from Spotify and YouTube Music – tagged and numbered." = "Ganze Alben und Playlists von Spotify und YouTube Music – getaggt und nummeriert.";
 "Whole albums and playlists from Spotify, YouTube Music, YouTube or SoundCloud – named, numbered and tagged." = "Ganze Alben und Playlists von Spotify, YouTube Music, YouTube oder SoundCloud – benannt, nummeriert und getaggt.";
 "Whole albums and playlists – tagged, numbered, with a playlist file." = "Ganze Alben und Playlists – getaggt, nummeriert, mit Playlist-Datei.";
 "Whole playlist" = "Ganze Playlist";

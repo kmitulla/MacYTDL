@@ -168,16 +168,28 @@ struct PageHeader<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
-        HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
-                Text(subtitle)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
+        // Controls move below the title when the window is too narrow for one row.
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .bottom) {
+                titles
+                Spacer(minLength: 16)
+                trailing()
             }
-            Spacer()
-            trailing()
+            VStack(alignment: .leading, spacing: 12) {
+                titles
+                trailing()
+            }
+        }
+    }
+
+    private var titles: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 30, weight: .bold, design: .rounded))
+                .lineLimit(1)
+            Text(subtitle)
+                .font(.title3)
+                .foregroundStyle(.secondary)
         }
     }
 }

@@ -122,8 +122,8 @@ struct OnboardingView: View {
             }
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 12) {
                 feature("bolt.fill", "Everything included", "yt-dlp, FFmpeg and Deno are built in and update themselves.")
-                feature("sparkles", "Smart commands", "Say “only audio as MP3” – Lasso sets the right options.")
-                feature("dot.radiowaves.left.and.right", "Subscriptions", "New videos from your favourite channels download automatically.")
+                feature("music.note.list", "Music & Spotify", "Whole albums and playlists from Spotify and YouTube Music – tagged and numbered.")
+                feature("play.circle", "Player & library", "Play, sort by album and organize everything right in Lasso.")
                 feature("lock.shield", "Private", "No account, no tracking. Everything happens on your Mac.")
             }
             .padding(18)

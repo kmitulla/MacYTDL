@@ -27,7 +27,7 @@ struct MiniPlayerBar: View {
                         Text(item.title).font(.callout.weight(.semibold)).lineLimit(1)
                         Text(item.displayArtist).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                     }
-                    .frame(width: 190, alignment: .leading)
+                    .frame(minWidth: 80, idealWidth: 190, maxWidth: 190, alignment: .leading)
 
                     HStack(spacing: 4) {
                         transport("backward.fill", help: "Previous") { player.previous() }
@@ -53,13 +53,13 @@ struct MiniPlayerBar: View {
                         Text(Format.duration(player.duration).ifEmpty("0:00"))
                             .font(.caption.monospacedDigit()).foregroundStyle(.secondary).frame(width: 44, alignment: .leading)
                     }
-                    .frame(minWidth: 160)
+                    .frame(minWidth: 120)
 
                     HStack(spacing: 2) {
                         toggle("shuffle", active: player.shuffle, help: "Shuffle") { player.shuffle.toggle() }
                         toggle(player.repeatMode.symbol, active: player.repeatMode != .off, help: "Repeat") { player.cycleRepeat() }
                         Image(systemName: "speaker.wave.2.fill").font(.caption).foregroundStyle(.secondary).padding(.leading, 4)
-                        Slider(value: $player.volume, in: 0...1).frame(width: 70).controlSize(.mini)
+                        Slider(value: $player.volume, in: 0...1).frame(width: 60).controlSize(.mini)
                         transport("rectangle.expand.vertical", help: "Open player") { appState.openPlayerWindow?() }
                         transport("xmark", help: "Stop") { player.stop() }
                     }

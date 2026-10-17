@@ -501,8 +501,8 @@ private struct LibraryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Thumbnail(url: item.thumbnail, cornerRadius: 14, symbol: item.isAudio ? "music.note" : "play.rectangle.fill")
-                .aspectRatio(item.isAudio && item.source == "Spotify" ? 1 : 16 / 9, contentMode: .fit)
+            artwork
+                .aspectRatio(16 / 9, contentMode: .fit)
                 .overlay {
                     if hovering && item.fileExists && !selecting {
                         Button(action: onPlay) {
@@ -587,6 +587,24 @@ private struct LibraryCard: View {
         .onTapGesture(count: 2) { if item.fileExists && !selecting { onPlay() } }
         .onTapGesture(count: 1, perform: onTap)
         .draggable(item.fileURL)
+    }
+
+    /// Videos fill the card; music shows its square cover on a blurred backdrop, so all cards line up.
+    @ViewBuilder private var artwork: some View {
+        if item.isAudio {
+            ZStack {
+                Thumbnail(url: item.thumbnail, cornerRadius: 14, symbol: "music.note")
+                    .blur(radius: 24)
+                    .opacity(0.85)
+                Thumbnail(url: item.thumbnail, cornerRadius: 8, symbol: "music.note")
+                    .aspectRatio(1, contentMode: .fit)
+                    .padding(12)
+                    .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        } else {
+            Thumbnail(url: item.thumbnail, cornerRadius: 14, symbol: "play.rectangle.fill")
+        }
     }
 }
 
