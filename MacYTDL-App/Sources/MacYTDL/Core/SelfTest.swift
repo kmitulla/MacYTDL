@@ -45,17 +45,28 @@ enum SelfTest {
             check(status?.version != nil, "\(tool.displayName): \(status?.version ?? "missing") @ \(status?.path ?? "-")")
         }
         if let ytdlp = tools.ytdlpPath {
-            let verbose = await ProcessRunner.run(ytdlp, ["-v", "--ignore-config", "--version"], environment: tools.environment, timeout: 60)
-            let runtimeLine = (verbose.stdout + "\n" + verbose.stderr).split(separator: "\n")
-                .first(where: { $0.contains("JS runtimes") || $0.contains("exe versions") }) ?? "?"
-            print("  yt-dlp: \(runtimeLine)")
-            check((verbose.stdout + verbose.stderr).lowercased().contains("deno"), "yt-dlp detects the bundled deno runtime")
+            check(MachO.runsOnThisMac(URL(fileURLWithPath: ytdlp)), "Mach-O check accepts yt-dlp for this Mac")
+            let verbose = await ProcessRunner.run(ytdlp, ["-v", "--ignore-config", "--simulate", "--no-warnings",
+                                                          "--ffmpeg-location", tools.path(for: .ffmpeg) ?? "ffmpeg",
+                                                          "https://example.invalid/"],
+                                                  environment: tools.environment, timeout: 60)
+            let lines = (verbose.stdout + "\n" + verbose.stderr).split(separator: "\n")
+            for line in lines where line.contains("JS runtimes") || line.contains("exe versions") {
+                print("  \(line)")
+            }
+            let runtimes = lines.first(where: { $0.contains("JS runtimes") }) ?? ""
+            check(runtimes.lowercased().contains("deno"), "yt-dlp detects the bundled deno runtime")
         }
+        print("  certificates: \(ToolManager.certificateBundle ?? "none")")
+        check(ToolManager.certificateBundle != nil, "CA certificate bundle available for FFmpeg")
 
         print("== Metadata")
+        // Small public test videos *with* an audio track (needed for the audio test).
         let sampleURLs = [
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+            "https://download.samplelib.com/mp4/sample-5s.mp4",
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-            "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
         ]
         var sample: String?
         for url in sampleURLs {
@@ -115,6 +126,21 @@ enum SelfTest {
             manager.resume(pauseTask)
             await waitUntil(timeout: 300) { pauseTask.state.isFinished }
             check(pauseTask.state == .completed, "resume completes (\(pauseTask.state.rawValue)) \(pauseTask.errorMessage ?? "")")
+        }
+
+        print("== HLS stream clip (informational)")
+        var hlsOptions = DownloadOptions()
+        hlsOptions.folder = (outputFolder as NSString).appendingPathComponent("hls")
+        hlsOptions.preset = .sd480
+        hlsOptions.clipStart = "0:00"
+        hlsOptions.clipEnd = "0:06"
+        hlsOptions.embedThumbnail = false
+        let hls = await download("https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8",
+                                 options: hlsOptions, timeout: 180)
+        if hls.state == .completed {
+            print("  ✓ HLS clip: \(hls.outputFiles)")
+        } else {
+            warn("HLS clip: \(hls.errorMessage ?? hls.state.rawValue)")
         }
 
         print("== Error handling")

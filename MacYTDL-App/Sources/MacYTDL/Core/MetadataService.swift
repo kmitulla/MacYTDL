@@ -242,6 +242,8 @@ enum ErrorAdvisor {
             hint = String(localized: "Access denied by the website (403). Update yt-dlp under Settings › Components; cookies may also help.")
         } else if lower.contains("http error 429") || lower.contains("too many requests") {
             hint = String(localized: "Too many requests – the website is rate limiting you. Wait a few minutes or use browser cookies.")
+        } else if lower.contains("unable to obtain file audio codec") || lower.contains("does not contain any stream") || lower.contains("output file #0 does not contain") {
+            hint = String(localized: "This video has no audio track, so no audio file can be created.")
         } else if lower.contains("requested format is not available") {
             hint = String(localized: "The selected quality isn't available for this video. Choose “Best quality” instead.")
         } else if lower.contains("ffmpeg") && (lower.contains("not found") || lower.contains("not installed")) {

@@ -110,7 +110,7 @@ final class ToolManager: ObservableObject {
         return Self.systemPath(for: tool)
     }
 
-    static func systemPath(for tool: HelperTool) -> String? {
+    nonisolated static func systemPath(for tool: HelperTool) -> String? {
         for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"] {
             let candidate = "\(dir)/\(tool.rawValue)"
             if FileManager.default.isExecutableFile(atPath: candidate) { return candidate }
@@ -157,6 +157,8 @@ final class ToolManager: ObservableObject {
         for tool in HelperTool.allCases {
             let source = dir.appendingPathComponent(tool.rawValue)
             guard fm.fileExists(atPath: source.path) else { continue }
+            // The DMG ships Apple Silicon helpers; Intel Macs download their own (see healMissingTools).
+            guard MachO.runsOnThisMac(source) else { continue }
             let destination = AppPaths.bin.appendingPathComponent(tool.rawValue)
             let bundledVersion = bundled[tool.rawValue] ?? "0"
             let installedVersion = installed[tool.rawValue]
@@ -192,7 +194,7 @@ final class ToolManager: ObservableObject {
         installedManifest = installed
     }
 
-    static func makeRunnable(_ url: URL) {
+    nonisolated static func makeRunnable(_ url: URL) {
         chmod(url.path, 0o755)
         removexattr(url.path, "com.apple.quarantine", 0)
         removexattr(url.path, "com.apple.provenance", 0)
@@ -203,8 +205,10 @@ final class ToolManager: ObservableObject {
     func prepare() async {
         isPreparing = true
         installBundledToolsIfNeeded()
+        Self.ensureCertificateBundle()
         await refreshVersions()
         isPreparing = false
+        if !DemoMode.isActive { await healMissingTools() }
         if prefs.autoUpdateYTDLP, prefs.toolSource == .managed, !DemoMode.isActive {
             let last = prefs.lastUpdateCheck ?? .distantPast
             if Date().timeIntervalSince(last) > 20 * 3600 {
@@ -247,6 +251,38 @@ final class ToolManager: ObservableObject {
             // "deno 2.5.4 (stable, release, aarch64-apple-darwin)"
             let parts = firstLine.split(separator: " ")
             return parts.count > 1 ? String(parts[1]) : (firstLine.isEmpty ? nil : firstLine)
+        }
+    }
+
+    /// Downloads helpers that are missing or can't run here (e.g. on Intel Macs, or after the user deleted them).
+    func healMissingTools() async {
+        guard prefs.toolSource == .managed else { return }
+        let broken = [HelperTool.ffmpeg, .ffprobe, .deno].filter { status[$0]?.version == nil }
+        guard !broken.isEmpty else { return }
+        lastMessage = String(localized: "Setting up components for this Mac…")
+        for tool in broken {
+            await reinstall(tool)
+        }
+    }
+
+    /// Static FFmpeg builds need a PEM file with root certificates (normally /etc/ssl/cert.pem).
+    nonisolated static var certificateBundle: String? {
+        if FileManager.default.fileExists(atPath: "/etc/ssl/cert.pem") { return "/etc/ssl/cert.pem" }
+        let own = AppPaths.support.appendingPathComponent("cacert.pem").path
+        return FileManager.default.fileExists(atPath: own) ? own : nil
+    }
+
+    static func ensureCertificateBundle() {
+        guard certificateBundle == nil else { return }
+        let target = AppPaths.support.appendingPathComponent("cacert.pem")
+        Task.detached {
+            let result = await ProcessRunner.run("/usr/bin/security",
+                                                 ["find-certificate", "-a", "-p",
+                                                  "/System/Library/Keychains/SystemRootCertificates.keychain"],
+                                                 timeout: 60)
+            if result.status == 0, !result.stdout.isEmpty {
+                try? (result.stdout + "\n").write(to: target, atomically: true, encoding: .utf8)
+            }
         }
     }
 
@@ -346,7 +382,7 @@ final class ToolManager: ObservableObject {
         Self.makeRunnable(destination)
     }
 
-    static var isAppleSilicon: Bool {
+    nonisolated static var isAppleSilicon: Bool {
         var info = utsname()
         uname(&info)
         let machine = withUnsafePointer(to: &info.machine) {
@@ -358,5 +394,43 @@ final class ToolManager: ObservableObject {
         var size = MemoryLayout<Int32>.size
         if sysctlbyname("sysctl.proc_translated", &translated, &size, nil, 0) == 0 { return translated == 1 }
         return false
+    }
+}
+
+/// Minimal Mach-O header reader to check whether a binary contains a slice for this Mac.
+enum MachO {
+    static let cpuARM64: UInt32 = 0x0100_000C
+    static let cpuX86_64: UInt32 = 0x0100_0007
+
+    static func architectures(of url: URL) -> Set<UInt32> {
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return [] }
+        defer { try? handle.close() }
+        guard let header = try? handle.read(upToCount: 4096), header.count >= 8 else { return [] }
+        let bytes = [UInt8](header)
+        func be(_ offset: Int) -> UInt32 {
+            guard offset + 4 <= bytes.count else { return 0 }
+            return bytes[offset..<offset + 4].reduce(0) { $0 << 8 | UInt32($1) }
+        }
+        func le(_ offset: Int) -> UInt32 {
+            guard offset + 4 <= bytes.count else { return 0 }
+            return bytes[offset..<offset + 4].reversed().reduce(0) { $0 << 8 | UInt32($1) }
+        }
+        let magicBE = be(0)
+        if magicBE == 0xCAFE_BABE || magicBE == 0xCAFE_BABF { // fat (32/64-bit offsets)
+            let count = Int(be(4))
+            let entrySize = magicBE == 0xCAFE_BABE ? 20 : 32
+            var result = Set<UInt32>()
+            for i in 0..<min(count, 16) { result.insert(be(8 + i * entrySize)) }
+            return result
+        }
+        let magicLE = le(0)
+        if magicLE == 0xFEED_FACF || magicLE == 0xFEED_FACE { return [le(4)] }
+        return []
+    }
+
+    static func runsOnThisMac(_ url: URL) -> Bool {
+        let archs = architectures(of: url)
+        guard !archs.isEmpty else { return true } // not Mach-O (script?) - let it try
+        return archs.contains(ToolManager.isAppleSilicon ? cpuARM64 : cpuX86_64)
     }
 }

@@ -39,6 +39,13 @@ final class ProcessRunner: @unchecked Sendable {
         env["LANG"] = env["LANG"] ?? "en_US.UTF-8"
         env["LC_ALL"] = "en_US.UTF-8"
         env["NO_COLOR"] = "1"
+        // Static FFmpeg builds use OpenSSL, which doesn't know where macOS keeps its CA certificates.
+        if env["SSL_CERT_FILE"] == nil, let bundle = ToolManager.certificateBundle {
+            env["SSL_CERT_FILE"] = bundle
+        }
+        if env["SSL_CERT_DIR"] == nil, FileManager.default.fileExists(atPath: "/etc/ssl/certs") {
+            env["SSL_CERT_DIR"] = "/etc/ssl/certs"
+        }
         return env
     }
 

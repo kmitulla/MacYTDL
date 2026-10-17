@@ -1,6 +1,6 @@
 import Foundation
 import AppKit
-import UserNotifications
+@preconcurrency import UserNotifications
 
 /// One entry in the download queue.
 @MainActor

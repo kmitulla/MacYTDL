@@ -350,10 +350,11 @@ enum Finder {
         return panel.runModal() == .OK ? panel.url?.path : nil
     }
 
+    /// Free space on the home volume. (Deliberately doesn't touch ~/Downloads, which would trigger a
+    /// privacy prompt at launch.)
     static var freeDiskSpace: Int64? {
-        let url = URL(fileURLWithPath: Preferences.shared.downloadFolder)
-        let target = FileManager.default.fileExists(atPath: url.path) ? url : URL(fileURLWithPath: NSHomeDirectory())
-        let values = try? target.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+        let values = try? URL(fileURLWithPath: NSHomeDirectory())
+            .resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
         return values?.volumeAvailableCapacityForImportantUsage
     }
 }

@@ -315,6 +315,7 @@
 "Searching…" = "Suche …";
 "Select a link in any app › right-click › Services › “Download with MacYTDL”." = "Link in einer beliebigen App markieren › Rechtsklick › Dienste › „Mit MacYTDL laden“.";
 "Services menu" = "Dienste-Menü";
+"Setting up components for this Mac…" = "Richte Komponenten für diesen Mac ein …";
 "Setting up components…" = "Richte Komponenten ein …";
 "Settings" = "Einstellungen";
 "Settings (⌘,)" = "Einstellungen (⌘,)";
@@ -360,6 +361,7 @@
 "Theme" = "Design";
 "This content requires an account. Use cookies from a browser in which you're signed in (Settings › Network)." = "Für diesen Inhalt ist ein Konto nötig. Verwende Cookies aus einem Browser, in dem du angemeldet bist (Einstellungen › Netzwerk).";
 "This link belongs to a playlist." = "Dieser Link gehört zu einer Playlist.";
+"This video has no audio track, so no audio file can be created." = "Dieses Video hat keine Tonspur – daher kann keine Audiodatei erstellt werden.";
 "This video is age-restricted. Use cookies from a browser in which you're signed in (Settings › Network)." = "Dieses Video ist altersbeschränkt. Verwende Cookies aus einem Browser, in dem du angemeldet bist (Einstellungen › Netzwerk).";
 "This website isn't supported, or the link doesn't point to a video." = "Diese Website wird nicht unterstützt oder der Link führt nicht zu einem Video.";
 "Thumbnail as JPG" = "Vorschaubild als JPG";

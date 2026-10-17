@@ -18,8 +18,13 @@ enum DemoMode {
         "https://i.ytimg.com/vi/R6MlUcmOul8/hqdefault.jpg",
     ]
 
+    static func log(_ message: String) {
+        FileHandle.standardError.write(Data("demo: \(message)\n".utf8))
+    }
+
     static func applyIfRequested() {
         guard let page else { return }
+        log("page \(page), windows: \(NSApp.windows.count)")
         let appState = AppState.shared
         appState.showOnboarding = page == "onboarding"
         fillQueue()
@@ -124,6 +129,7 @@ enum DemoMode {
 
     /// Renders the key window into a PNG (no screen-recording permission needed), then quits.
     static func snapshot(to path: String) {
+        log("snapshot – windows: \(NSApp.windows.map { "\($0.title) \(Int($0.frame.width))x\(Int($0.frame.height)) visible=\($0.isVisible)" })")
         let window = NSApp.keyWindow ?? NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil && $0.frame.width > 400 })
         if let window, let view = window.contentView?.superview ?? window.contentView,
            let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
@@ -132,6 +138,10 @@ enum DemoMode {
                 try? data.write(to: URL(fileURLWithPath: path))
             }
             try? "\(window.windowNumber)".write(toFile: path + ".wid", atomically: true, encoding: .utf8)
+            log("wrote \(path)")
+        } else {
+            log("no window to capture")
+            try? "0".write(toFile: path + ".wid", atomically: true, encoding: .utf8)
         }
         // Give an external `screencapture -l` a moment, then quit.
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) { exit(0) }

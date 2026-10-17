@@ -10,13 +10,14 @@ for page in home preview queue library search subscriptions settings onboarding;
   echo "== $page"
   rm -f "$OUT/$page.png" "$OUT/$page.png.wid"
   "$APP/Contents/MacOS/MacYTDL" -MacYTDLDemo "$page" -MacYTDLSnapshot "$OUT/$page.png" \
-    -AppleLanguages "($LANG_CODE)" -NSQuitAlwaysKeepsWindows NO >"$OUT/$page.log" 2>&1 &
+    -AppleLanguages "($LANG_CODE)" -NSQuitAlwaysKeepsWindows NO -downloadFolder /tmp/macytdl-demo-downloads \
+    >"$OUT/$page.log" 2>&1 &
   pid=$!
   for _ in $(seq 1 60); do
     [ -f "$OUT/$page.png.wid" ] && break
     sleep 0.5
   done
-  if [ -f "$OUT/$page.png.wid" ]; then
+  if [ -f "$OUT/$page.png.wid" ] && [ "$(cat "$OUT/$page.png.wid")" != 0 ]; then
     screencapture -x -o -l "$(cat "$OUT/$page.png.wid")" "$OUT/$page-window.png" 2>/dev/null || true
   else
     echo "no snapshot for $page"
@@ -26,6 +27,7 @@ for page in home preview queue library search subscriptions settings onboarding;
     sleep 0.5
   done
   kill $pid 2>/dev/null || true
+  cat "$OUT/$page.log"
 done
 screencapture -x "$OUT/desktop.png" 2>/dev/null || true
 ls -la "$OUT"

@@ -90,7 +90,7 @@ jobs:
           TAG=ci-preview
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --prerelease --target "$GITHUB_SHA" \
             --title "CI preview (screenshots)" --notes "Automatic screenshots and self-test logs from CI. Not a release."
-          FILES=$(ls "$RUNNER_TEMP"/shots/*.png "$RUNNER_TEMP"/shots/*.log "$RUNNER_TEMP"/selftest.log 2>/dev/null || true)
+          FILES=$(find "$RUNNER_TEMP/shots" "$RUNNER_TEMP/selftest.log" -type f -size +0 \( -name '*.png' -o -name '*.log' \) 2>/dev/null || true)
           [ -n "$FILES" ] && gh release upload "$TAG" $FILES --clobber
 
       - name: Publish release
