@@ -113,6 +113,7 @@ struct OnboardingView: View {
                     .font(.title3)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 12) {
                 feature("bolt.fill", "Everything included", "yt-dlp, FFmpeg and Deno are built in and update themselves.")

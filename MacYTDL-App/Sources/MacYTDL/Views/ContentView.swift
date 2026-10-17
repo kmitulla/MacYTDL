@@ -185,11 +185,15 @@ private struct SidebarFooter: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                Spacer()
+                .lineLimit(1)
+                .fixedSize()
+                Spacer(minLength: 4)
                 if let free = disk.free {
                     Text("\(Format.bytes(free)) free")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .fixedSize()
                 }
             }
         }

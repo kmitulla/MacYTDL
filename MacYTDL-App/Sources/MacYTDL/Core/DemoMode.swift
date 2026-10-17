@@ -10,12 +10,12 @@ enum DemoMode {
     static var snapshotPath: String? { UserDefaults.standard.string(forKey: "MacYTDLSnapshot") }
 
     private static let thumbs = [
-        "https://i.ytimg.com/vi/aqz-KE-bpKQ/hqdefault.jpg",
-        "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg",
-        "https://i.ytimg.com/vi/eRsGyueVLvQ/hqdefault.jpg",
-        "https://i.ytimg.com/vi/YE7VzlLtp-4/hqdefault.jpg",
-        "https://i.ytimg.com/vi/TLkA0RELQ1g/hqdefault.jpg",
-        "https://i.ytimg.com/vi/R6MlUcmOul8/hqdefault.jpg",
+        "https://i.ytimg.com/vi/aqz-KE-bpKQ/mqdefault.jpg",
+        "https://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg",
+        "https://i.ytimg.com/vi/eRsGyueVLvQ/mqdefault.jpg",
+        "https://i.ytimg.com/vi/YE7VzlLtp-4/mqdefault.jpg",
+        "https://i.ytimg.com/vi/TLkA0RELQ1g/mqdefault.jpg",
+        "https://i.ytimg.com/vi/R6MlUcmOul8/mqdefault.jpg",
     ]
 
     static func log(_ message: String) {
@@ -134,7 +134,10 @@ enum DemoMode {
     /// Renders the key window into a PNG (no screen-recording permission needed), then quits.
     static func snapshot(to path: String) {
         log("snapshot – windows: \(NSApp.windows.map { "\($0.title) \(Int($0.frame.width))x\(Int($0.frame.height)) visible=\($0.isVisible)" })")
-        let window = NSApp.keyWindow ?? NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil && $0.frame.width > 400 })
+        let candidates = NSApp.windows.filter { $0.isVisible && $0.contentView != nil && $0.frame.width > 400 }
+        let window = page == "settings"
+            ? (candidates.first { $0.title != "MacYTDL" } ?? NSApp.keyWindow)
+            : (candidates.first { $0.title == "MacYTDL" } ?? NSApp.keyWindow ?? candidates.first)
         if let window, let view = window.contentView?.superview ?? window.contentView,
            let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
             view.cacheDisplay(in: view.bounds, to: rep)

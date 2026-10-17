@@ -135,7 +135,7 @@ private struct SubscriptionRow: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                HStack(spacing: 6) {
+                FlowRow(spacing: 6) {
                     Pill(text: String(localized: "Checked \(Format.relative(subscription.lastChecked))"), symbol: "clock")
                     if subscription.lastNewCount > 0 {
                         Pill(text: String(localized: "\(subscription.lastNewCount) new"), symbol: "sparkles", color: .green)
@@ -147,7 +147,7 @@ private struct SubscriptionRow: View {
                     }
                 }
             }
-            Spacer()
+            Spacer(minLength: 12)
             VStack(alignment: .trailing, spacing: 8) {
                 HStack(spacing: 8) {
                     Picker("", selection: binding(\.preset)) {

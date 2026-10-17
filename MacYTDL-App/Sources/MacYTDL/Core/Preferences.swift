@@ -131,30 +131,30 @@ final class Preferences: ObservableObject {
         } else {
             defaultOptions = DownloadOptions()
         }
-        maxConcurrent = defaults.object(forKey: "maxConcurrent") as? Int ?? 3
-        autoRetry = defaults.object(forKey: "autoRetry") as? Int ?? 2
+        maxConcurrent = Self.number(defaults, "maxConcurrent", 3)
+        autoRetry = Self.number(defaults, "autoRetry", 2)
         cookieBrowser = CookieBrowser(rawValue: defaults.string(forKey: "cookieBrowser") ?? "") ?? .none
         rateLimit = defaults.string(forKey: "rateLimit") ?? ""
         proxy = defaults.string(forKey: "proxy") ?? ""
-        concurrentFragments = defaults.object(forKey: "concurrentFragments") as? Int ?? 4
+        concurrentFragments = Self.number(defaults, "concurrentFragments", 4)
         forceIPv4 = defaults.bool(forKey: "forceIPv4")
         restrictFilenames = defaults.bool(forKey: "restrictFilenames")
-        trimFilenames = defaults.object(forKey: "trimFilenames") as? Int ?? 120
+        trimFilenames = Self.number(defaults, "trimFilenames", 120)
         customArguments = defaults.string(forKey: "customArguments") ?? ""
-        autoUpdateYTDLP = defaults.object(forKey: "autoUpdateYTDLP") as? Bool ?? true
+        autoUpdateYTDLP = Self.flag(defaults, "autoUpdateYTDLP", true)
         useNightly = defaults.bool(forKey: "useNightly")
         toolSource = ToolSource(rawValue: defaults.string(forKey: "toolSource") ?? "") ?? .managed
-        showMenuBarExtra = defaults.object(forKey: "showMenuBarExtra") as? Bool ?? true
-        watchClipboard = defaults.object(forKey: "watchClipboard") as? Bool ?? true
-        autoAnalyze = defaults.object(forKey: "autoAnalyze") as? Bool ?? true
-        notifyOnFinish = defaults.object(forKey: "notifyOnFinish") as? Bool ?? true
-        playSound = defaults.object(forKey: "playSound") as? Bool ?? true
-        keepAwake = defaults.object(forKey: "keepAwake") as? Bool ?? true
+        showMenuBarExtra = Self.flag(defaults, "showMenuBarExtra", true)
+        watchClipboard = Self.flag(defaults, "watchClipboard", true)
+        autoAnalyze = Self.flag(defaults, "autoAnalyze", true)
+        notifyOnFinish = Self.flag(defaults, "notifyOnFinish", true)
+        playSound = Self.flag(defaults, "playSound", true)
+        keepAwake = Self.flag(defaults, "keepAwake", true)
         afterQueue = AfterQueueAction(rawValue: defaults.string(forKey: "afterQueue") ?? "") ?? .nothing
         appearance = AppearanceMode(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
         accent = AccentChoice(rawValue: defaults.string(forKey: "accent") ?? "") ?? .ocean
-        autoResumeQueue = defaults.object(forKey: "autoResumeQueue") as? Bool ?? true
-        assistantEnabled = defaults.object(forKey: "assistantEnabled") as? Bool ?? true
+        autoResumeQueue = Self.flag(defaults, "autoResumeQueue", true)
+        assistantEnabled = Self.flag(defaults, "assistantEnabled", true)
         onboardingDone = defaults.bool(forKey: "onboardingDone")
         lastUpdateCheck = defaults.object(forKey: "lastUpdateCheck") as? Date
     }
@@ -198,6 +198,15 @@ final class Preferences: ObservableObject {
         accent = fresh.accent
         autoResumeQueue = fresh.autoResumeQueue
         assistantEnabled = fresh.assistantEnabled
+    }
+
+    /// Reads a flag that may also come from the command line (`-key YES`), where it is a string.
+    private static func flag(_ defaults: UserDefaults, _ key: String, _ fallback: Bool) -> Bool {
+        defaults.object(forKey: key) == nil ? fallback : defaults.bool(forKey: key)
+    }
+
+    private static func number(_ defaults: UserDefaults, _ key: String, _ fallback: Int) -> Int {
+        defaults.object(forKey: key) == nil ? fallback : defaults.integer(forKey: key)
     }
 
     private func save(_ value: Any, _ key: String) {

@@ -6,32 +6,36 @@ APP=$1
 OUT=$2
 LANG_CODE=${3:-de}
 mkdir -p "$OUT"
-for page in home preview queue library search subscriptions settings onboarding; do
-  echo "== $page"
-  rm -f "$OUT/$page.png" "$OUT/$page.png.wid"
-  "$APP/Contents/MacOS/MacYTDL" -MacYTDLDemo "$page" -MacYTDLSnapshot "$OUT/$page.png" \
+for spec in home preview queue library search subscriptions settings onboarding home:dark preview:dark; do
+  page=${spec%%:*}
+  appearance=system
+  if [ "$spec" != "$page" ]; then appearance=${spec##*:}; fi
+  shot=$page
+  [ "$appearance" = system ] || shot="$page-$appearance"
+  echo "== $shot"
+  rm -f "$OUT/$shot.png" "$OUT/$shot.png.wid"
+  "$APP/Contents/MacOS/MacYTDL" -MacYTDLDemo "$page" -MacYTDLSnapshot "$OUT/$shot.png" -appearance "$appearance" -autoAnalyze NO \
     -AppleLanguages "($LANG_CODE)" -NSQuitAlwaysKeepsWindows NO -downloadFolder /tmp/macytdl-demo-downloads \
     -MacYTDLTraceRenders YES \
-    >"$OUT/$page.log" 2>&1 &
+    >"$OUT/$shot.log" 2>&1 &
   pid=$!
   for _ in $(seq 1 60); do
-    [ -f "$OUT/$page.png.wid" ] && break
+    [ -f "$OUT/$shot.png.wid" ] && break
     sleep 0.5
   done
-  if [ -f "$OUT/$page.png.wid" ] && [ "$(cat "$OUT/$page.png.wid")" != 0 ]; then
-    screencapture -x -o -l "$(cat "$OUT/$page.png.wid")" "$OUT/$page-window.png" 2>/dev/null || true
+  if [ -f "$OUT/$shot.png.wid" ] && [ "$(cat "$OUT/$shot.png.wid")" != 0 ]; then
+    screencapture -x -o -l "$(cat "$OUT/$shot.png.wid")" "$OUT/$shot-window.png" 2>/dev/null || true
   else
-    echo "no snapshot for $page – sampling main thread"
-    /usr/bin/sample $pid 3 -file "$OUT/$page-sample.log" >/dev/null 2>&1 || true
-    grep -A40 "Thread_.*DispatchQueue_1: com.apple.main-thread" "$OUT/$page-sample.log" | head -60 || true
+    echo "no snapshot for $shot – sampling main thread"
+    /usr/bin/sample $pid 3 -file "$OUT/$shot-sample.log" >/dev/null 2>&1 || true
   fi
   for _ in $(seq 1 30); do
     kill -0 $pid 2>/dev/null || break
     sleep 0.5
   done
   kill $pid 2>/dev/null || true
-  echo "--- $page.log (render trace summary)"
-  sort "$OUT/$page.log" | uniq -c | sort -rn | head -15
+  echo "--- $shot.log (render trace summary)"
+  sort "$OUT/$shot.log" | uniq -c | sort -rn | head -15
 done
 screencapture -x "$OUT/desktop.png" 2>/dev/null || true
 ls -la "$OUT"
