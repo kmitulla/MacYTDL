@@ -11,6 +11,7 @@ for page in home preview queue library search subscriptions settings onboarding;
   rm -f "$OUT/$page.png" "$OUT/$page.png.wid"
   "$APP/Contents/MacOS/MacYTDL" -MacYTDLDemo "$page" -MacYTDLSnapshot "$OUT/$page.png" \
     -AppleLanguages "($LANG_CODE)" -NSQuitAlwaysKeepsWindows NO -downloadFolder /tmp/macytdl-demo-downloads \
+    -MacYTDLTraceRenders YES \
     >"$OUT/$page.log" 2>&1 &
   pid=$!
   for _ in $(seq 1 60); do
@@ -29,7 +30,8 @@ for page in home preview queue library search subscriptions settings onboarding;
     sleep 0.5
   done
   kill $pid 2>/dev/null || true
-  cat "$OUT/$page.log"
+  echo "--- $page.log (render trace summary)"
+  sort "$OUT/$page.log" | uniq -c | sort -rn | head -15
 done
 screencapture -x "$OUT/desktop.png" 2>/dev/null || true
 ls -la "$OUT"

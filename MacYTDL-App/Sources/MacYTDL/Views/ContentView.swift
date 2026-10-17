@@ -12,6 +12,7 @@ struct ContentView: View {
     private let clipboardTimer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
 
     var body: some View {
+        let _ = DemoMode.traceRenders ? Self._printChanges() : ()
         NavigationSplitView {
             Sidebar()
                 .navigationSplitViewColumnWidth(min: 210, ideal: 230, max: 300)
@@ -118,7 +119,8 @@ private struct Sidebar: View {
     @EnvironmentObject private var subscriptions: SubscriptionStore
 
     var body: some View {
-        List(selection: Binding(get: { appState.selection }, set: { if let v = $0 { appState.selection = v } })) {
+        let _ = DemoMode.traceRenders ? Self._printChanges() : ()
+        List(selection: Binding(get: { appState.selection }, set: { if let v = $0, v != appState.selection { appState.selection = v } })) {
             Section {
                 ForEach(SidebarItem.allCases) { item in
                     Label(item.title, systemImage: item.symbol)
@@ -148,6 +150,7 @@ private struct SidebarFooter: View {
     @ObservedObject private var disk = DiskSpaceMonitor.shared
 
     var body: some View {
+        let _ = DemoMode.traceRenders ? Self._printChanges() : ()
         VStack(alignment: .leading, spacing: 8) {
             if downloads.activeCount > 0 {
                 HStack(spacing: 8) {

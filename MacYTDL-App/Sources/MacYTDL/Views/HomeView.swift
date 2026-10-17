@@ -144,6 +144,7 @@ struct HomeView: View {
     @EnvironmentObject private var prefs: Preferences
 
     var body: some View {
+        let _ = DemoMode.traceRenders ? Self._printChanges() : ()
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 hero

@@ -47,7 +47,10 @@ struct MacYTDLApp: App {
                 .tint(prefs.accent.color)
         }
 
-        MenuBarExtra(isInserted: $prefs.showMenuBarExtra) {
+        MenuBarExtra(isInserted: Binding(
+            get: { prefs.showMenuBarExtra },
+            set: { if $0 != prefs.showMenuBarExtra { prefs.showMenuBarExtra = $0 } }
+        )) {
             MenuBarView()
                 .environmentObjects()
                 .tint(prefs.accent.color)
@@ -104,11 +107,24 @@ enum SidebarItem: String, Hashable, CaseIterable, Identifiable {
 final class AppState: ObservableObject {
     static let shared = AppState()
 
-    @Published var selection: SidebarItem = .home
-    @Published var clipboardSuggestion: String?
-    @Published var showOnboarding = false
-    @Published var logTask: DownloadTask?
-    @Published var focusURLField = UUID()
+    // SwiftUI writes some of these back through bindings on every update (List selection, sheets).
+    // @Published would announce identical values and can cause an endless render loop, so only real
+    // changes are published.
+    var selection: SidebarItem = .home {
+        willSet { if newValue != selection { objectWillChange.send() } }
+    }
+    var clipboardSuggestion: String? {
+        willSet { if newValue != clipboardSuggestion { objectWillChange.send() } }
+    }
+    var showOnboarding = false {
+        willSet { if newValue != showOnboarding { objectWillChange.send() } }
+    }
+    var logTask: DownloadTask? {
+        willSet { if newValue?.id != logTask?.id { objectWillChange.send() } }
+    }
+    var focusURLField = UUID() {
+        willSet { objectWillChange.send() }
+    }
     /// Captured from a SwiftUI view so the app delegate can reopen the main window (Dock click).
     var openMainWindow: (() -> Void)?
 

@@ -22,8 +22,12 @@ enum DemoMode {
         FileHandle.standardError.write(Data("demo: \(message)\n".utf8))
     }
 
+    /// Set by `-MacYTDLTraceRenders YES`: views log why they re-render (diagnoses update loops).
+    static var traceRenders: Bool { UserDefaults.standard.bool(forKey: "MacYTDLTraceRenders") }
+
     static func applyIfRequested() {
         guard let page else { return }
+        setvbuf(stdout, nil, _IOLBF, 0)
         log("page \(page), windows: \(NSApp.windows.count)")
         let appState = AppState.shared
         appState.showOnboarding = page == "onboarding"
