@@ -656,7 +656,9 @@ final class DownloadManager: ObservableObject {
             if task.outputFiles.isEmpty {
                 // Nothing matched (or the source failed) - try the next search strategy.
                 success = false
-                if task.musicAttempt + 1 < CommandBuilder.musicAttempts {
+                // Other search strategies hit the same wall when YouTube asks for a sign-in.
+                let blocked = task.lastErrorText.lowercased().contains("not a bot")
+                if task.musicAttempt + 1 < CommandBuilder.musicAttempts && !blocked {
                     // No matching song with this strategy - try the next one.
                     task.musicAttempt += 1
                     task.attempts = max(0, task.attempts - 1)
@@ -667,7 +669,10 @@ final class DownloadManager: ObservableObject {
                     pump()
                     return
                 }
-                task.lastErrorText = String(localized: "No matching song found on YouTube Music or YouTube.")
+                // Keep a real yt-dlp error (bot check, network …) so the advice explains it.
+                if !task.lastErrorText.contains("ERROR") {
+                    task.lastErrorText = String(localized: "No matching song found on YouTube Music or YouTube.")
+                }
             }
         }
         // Playlists: a few unavailable videos shouldn't fail the whole download.

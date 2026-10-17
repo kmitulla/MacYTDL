@@ -266,6 +266,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             let prefs = Preferences.shared
             AppState.shared.showOnboarding = !prefs.onboardingDone
             DemoMode.applyIfRequested()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                MainActor.assumeIsolated { WindowManager.shared.ensureMainWindowAtLaunch() }
+            }
             Task { @MainActor in
                 await ToolManager.shared.prepare()
                 if !DemoMode.isActive {

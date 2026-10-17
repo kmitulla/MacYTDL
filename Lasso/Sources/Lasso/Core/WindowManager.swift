@@ -73,13 +73,30 @@ final class WindowManager: NSObject, ObservableObject {
         if let window = mainWindow, window.isVisible || window.isMiniaturized || orderedOut {
             if window.isMiniaturized { window.deminiaturize(nil) }
             window.makeKeyAndOrderFront(nil)
-        } else {
+        } else if let open = AppState.shared.openMainWindow {
             // The window was closed - SwiftUI creates a fresh one.
-            AppState.shared.openMainWindow?()
+            open()
+        } else {
+            // No SwiftUI view has appeared yet (e.g. the window was closed when Lasso last quit):
+            // use the Window menu item SwiftUI creates for the main scene.
+            openFromWindowMenu()
         }
         orderedOut = false
         isHiddenInMenuBar = false
         NSApp.activate()
+    }
+
+    /// SwiftUI doesn't reopen a `Window` scene that was closed when the app quit - but launching Lasso
+    /// should always show it.
+    func ensureMainWindowAtLaunch() {
+        guard mainWindow == nil, !isHiddenInMenuBar else { return }
+        showMainWindow()
+    }
+
+    private func openFromWindowMenu() {
+        guard let menu = NSApp.windowsMenu,
+              let index = menu.items.firstIndex(where: { $0.title == "Lasso" && $0.action != nil }) else { return }
+        menu.performActionForItem(at: index)
     }
 
     private func announceOnce() {

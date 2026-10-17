@@ -203,11 +203,14 @@ struct Thumbnail: View {
                 .font(.title)
                 .foregroundStyle(.white.opacity(0.85))
             if let url, let parsed = URL(string: url) {
-                AsyncImage(url: parsed, transaction: Transaction(animation: .easeOut(duration: 0.25))) { phase in
-                    if let image = phase.image {
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } else {
-                        Color.clear
+                // Color.clear takes the offered size, so a cropped (fill) image never widens the thumbnail.
+                Color.clear.overlay {
+                    AsyncImage(url: parsed, transaction: Transaction(animation: .easeOut(duration: 0.25))) { phase in
+                        if let image = phase.image {
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } else {
+                            Color.clear
+                        }
                     }
                 }
             }
