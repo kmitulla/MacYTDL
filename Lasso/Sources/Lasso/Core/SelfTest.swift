@@ -267,9 +267,9 @@ enum SelfTest {
         check(parsed[0]?.kind == "playlist" && parsed[0]?.id == "37i9dQZF1DXcBWIGoYBM5M", "parse intl playlist link")
         check(parsed[1]?.kind == "album" && parsed[1]?.id == "4aawyAB9vmqN3uQ7FjRGTy", "parse spotify: URI")
         check(parsed[2]?.kind == "track", "parse track link")
-        let fixture = """
+        let fixture = #"""
         <html><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"state":{"data":{"entity":{"type":"album","name":"Test Album","subtitle":"Artist A","visualIdentity":{"image":[{"url":"https://example.com/a.jpg","maxWidth":300}]},"trackList":[{"uri":"spotify:track:1","title":"Song One","subtitle":"Artist A,\u00a0Artist B","duration":185000,"isExplicit":false},{"uri":"spotify:track:2","title":"Song Two","subtitle":"Artist A","duration":200000,"isExplicit":true}]}}}}}}</script></html>
-        """
+        """#
         if let album = try? SpotifyService.parseEmbed(html: fixture, kind: .album, id: "x") {
             check(album.tracks.count == 2 && album.tracks[0].artists == ["Artist A", "Artist B"] && album.tracks[1].trackNumber == 2
                   && album.tracks[0].album == "Test Album", "embed JSON parsed (artists, album, track numbers)")

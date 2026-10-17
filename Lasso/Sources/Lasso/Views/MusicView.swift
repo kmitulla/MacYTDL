@@ -150,7 +150,7 @@ struct MusicView: View {
                 if model.isLoading {
                     HStack(spacing: 12) {
                         ProgressView()
-                        Text(SpotifyService.isSpotify(model.urlText) ? "Reading the song list from Spotify…" : "Reading the playlist…")
+                        Text(SpotifyService.isSpotify(model.urlText) ? LocalizedStringKey("Reading the song list from Spotify…") : LocalizedStringKey("Reading the playlist…"))
                             .foregroundStyle(.secondary)
                     }
                     .card(cornerRadius: 20)

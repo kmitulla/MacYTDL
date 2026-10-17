@@ -233,7 +233,7 @@ private struct ComponentRow: View {
                 Image(systemName: tool.isRequired ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
                     .foregroundStyle(tool.isRequired ? Color.red : Color.orange)
             }
-            Button(tool == .ytdlp ? "Update" : "Reinstall") {
+            Button(tool == .ytdlp ? LocalizedStringKey("Update") : LocalizedStringKey("Reinstall")) {
                 Task { await tools.reinstall(tool) }
             }
             .disabled(tools.busyTool != nil)

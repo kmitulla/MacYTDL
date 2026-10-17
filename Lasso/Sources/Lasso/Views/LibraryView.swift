@@ -245,7 +245,7 @@ struct LibraryView: View {
                 selecting.toggle()
                 if !selecting { selection = [] }
             } label: {
-                Label(selecting ? "Done" : "Select", systemImage: selecting ? "checkmark.circle.fill" : "checkmark.circle")
+                Label(selecting ? LocalizedStringKey("Done") : LocalizedStringKey("Select"), systemImage: selecting ? "checkmark.circle.fill" : "checkmark.circle")
             }
             .glassButtonStyle(prominent: selecting)
 
@@ -661,7 +661,7 @@ struct LibraryItemMenu: View {
         Button("Show in Finder") { Finder.reveal(item.filePath) }
         Button("Quick Look") { QuickLook.show(item.fileURL) }.disabled(!item.fileExists)
         Divider()
-        Button(item.isFavorite ? "Remove from Favorites" : "Add to Favorites") { LibraryStore.shared.toggleFavorite(targetIDs) }
+        Button(item.isFavorite ? LocalizedStringKey("Remove from Favorites") : LocalizedStringKey("Add to Favorites")) { LibraryStore.shared.toggleFavorite(targetIDs) }
         if let openSheet {
             CollectionMenu(ids: Array(targetIDs)) { openSheet(.newCollection(Array(targetIDs))) }
             Button("Edit Info…") { openSheet(.tags(targetIDs)) }

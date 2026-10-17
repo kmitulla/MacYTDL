@@ -177,6 +177,9 @@ enum DemoMode {
         let roadtrip = LibraryCollection(name: "Roadtrip 2030", itemIDs: [items[5].id, items[1].id, items[6].id, items[2].id, items[7].id])
         let watchLater = LibraryCollection(name: String(localized: "Watch later"), itemIDs: [items[8].id, items[11].id])
         LibraryStore.shared.replaceAll(items, collections: [roadtrip, watchLater])
+        // Empty placeholder files, so cards don't show "File missing".
+        try? FileManager.default.createDirectory(atPath: "/tmp/lasso-demo", withIntermediateDirectories: true)
+        for item in items where !item.fileExists { FileManager.default.createFile(atPath: item.filePath, contents: Data()) }
         return items
     }
 

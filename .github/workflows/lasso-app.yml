@@ -54,10 +54,11 @@ jobs:
           cat vendor/Tools/manifest.json
 
       - name: Build Lasso.app (universal)
+        id: build
         run: BUILD=${{ github.run_number }} ./scripts/build_app.sh vendor
 
       - name: Screenshots (demo mode)
-        if: always()
+        if: always() && steps.build.outcome == 'success'
         continue-on-error: true
         run: ./scripts/screenshots.sh dist/Lasso.app "$RUNNER_TEMP/shots" de
 

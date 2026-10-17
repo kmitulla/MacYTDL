@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-import UserNotifications
+@preconcurrency import UserNotifications
 
 /// "Minimize to the menu bar": the window's yellow button (and closing the window) hides Lasso's window and
 /// Dock icon - Lasso keeps running in the menu bar and comes back with one click.
